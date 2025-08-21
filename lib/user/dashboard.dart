@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:bank/partials/transaction_history.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -7,7 +8,34 @@ class Dashboard extends StatefulWidget {
   State<Dashboard> createState() => _DashboardState();
 }
 
-class _DashboardState extends State<Dashboard> {
+class _DashboardState extends State<Dashboard>
+    with SingleTickerProviderStateMixin {
+  final GlobalKey<FormState> _addMoney = GlobalKey<FormState>();
+
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 5, vsync: this);
+  }
+
+  List<({String name, String date, String amount})> transactions = [];
+
+  TextEditingController name = TextEditingController();
+  TextEditingController amount = TextEditingController();
+  TextEditingController date = TextEditingController();
+
+  String? validateInput(String value) {
+    if (value.trim() == "") {
+      return "input can't be epmty";
+    } else {
+      return null;
+    }
+  }
+
+  int totalAmount = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,316 +92,294 @@ class _DashboardState extends State<Dashboard> {
             topRight: Radius.circular(20),
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [Icon(Icons.home_filled, size: 30), Text('Home')],
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.add_chart_sharp, size: 30),
-                Text('History'),
-              ],
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.sync_alt_rounded, size: 30),
-                Text('transfer'),
-              ],
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [Icon(Icons.settings, size: 30), Text('Home')],
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.supervised_user_circle_outlined, size: 30),
-                Text('Profile'),
-              ],
+        child: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(icon: Icon(Icons.home_filled, size: 30), text: 'Home'),
+            Tab(icon: Icon(Icons.add_chart_sharp, size: 30), text: 'History'),
+            Tab(icon: Icon(Icons.sync_alt_rounded, size: 30), text: 'transfer'),
+            Tab(icon: Icon(Icons.settings, size: 30), text: 'Settings'),
+            Tab(
+              icon: Icon(Icons.supervised_user_circle_outlined, size: 30),
+              text: 'Profile',
             ),
           ],
         ),
       ),
       body: SafeArea(
         minimum: EdgeInsets.fromLTRB(20, 0, 20, 0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                height: 200,
-                margin: EdgeInsets.only(top: 20),
-                padding: EdgeInsets.all(20),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Text(style: TextStyle(fontSize: 20), 'Your Balance'),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 50,
-                          ),
-                          '\$3,000.00',
-                        ),
-                        Icon(Icons.remove_red_eye_sharp),
-                      ],
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (context) => Container(),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        minimumSize: Size(345, 50),
-                      ),
-                      child: Text(
-                        style: TextStyle(color: Colors.white, fontSize: 15),
-                        'Add Money',
-                      ),
-                    ),
-                  ],
-                ),
+        child: TabBarView(
+          controller: _tabController,
+          children: [
+            SingleChildScrollView(child: _dashboard(context)),
+            Container(
+              width: 300,
+              height: 400,
+              child: ListTile(
+                leading: Icon(Icons.abc_outlined),
+                title: Text("data"),
+                subtitle: Text("data subtilte"),
               ),
-              SizedBox(
-                height: 250,
-                width: double.infinity,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
-                          'Your cards',
-                        ),
-                        Row(
+            ),
+            Container(color: Colors.blue, width: 300, height: 400,),
+            Container(color: Colors.black, width: 300, height: 400),
+            Container(color: Colors.pink, width: 300, height: 400),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Column _dashboard(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          height: 200,
+          margin: EdgeInsets.only(top: 20),
+          padding: EdgeInsets.all(20),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text(style: TextStyle(fontSize: 20), 'Your Balance'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 50),
+                    '\$$totalAmount',
+                  ),
+                  Icon(Icons.remove_red_eye_sharp),
+                ],
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) => Container(
+                      padding: EdgeInsets.all(20),
+                      child: Form(
+                        key: _addMoney,
+                        child: Column(
                           children: [
-                            Icon(Icons.add),
-                            Text(
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 17,
+                            TextFormField(
+                              controller: name,
+                              validator: (value) => validateInput(value!),
+                              decoration: InputDecoration(
+                                labelText: 'Enter Recipient name',
                               ),
-                              'New card',
+                            ),
+                            TextFormField(
+                              validator: (value) => validateInput(value!),
+                              controller: amount,
+                              decoration: InputDecoration(labelText: 'Amount'),
+                            ),
+                            TextFormField(
+                              validator: (value) => validateInput(value!),
+                              controller: date,
+                              decoration: InputDecoration(
+                                labelText: 'Date and Time',
+                              ),
+                            ),
+
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  if (_addMoney.currentState!.validate()) {
+                                    _addMoney.currentState!.reset();
+
+                                    setState(() {
+                                      transactions.add((
+                                        amount: amount.text,
+                                        name: name.text,
+                                        date: date.text,
+                                      ));
+
+                                      totalAmount += int.parse(amount.text);
+                                    });
+
+                                    name.clear();
+                                    date.clear();
+                                    amount.clear();
+                                  }
+                                },
+                                child: Text("Add Money"),
+                              ),
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
-                    Column(
-                      children: [
-                        Container(
-                          height: 170,
-                          width: 300,
-                          padding: EdgeInsets.all(13),
-                          decoration: BoxDecoration(
-                            color: Colors.green[300],
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 30,
-                                    ),
-                                    'N.',
-                                  ),
-                                  Image(
-                                    width: 50,
-                                    height: 50,
-                                    image: AssetImage('images/mc.png'),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    children: [
-                                      Text('Debit card'),
-                                      Row(
-                                        children: [
-                                          Icon(Icons.horizontal_rule),
-                                          Text(
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 20,
-                                            ),
-                                            '4098',
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  Container(
-                                    width: 100,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(15),
-                                      color: Colors.white,
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Icon(Icons.remove_red_eye_outlined),
-                                        Text('Details'),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  minimumSize: Size(345, 50),
                 ),
-              ),
-
-              Container(
-                height: 403,
-                width: double.infinity,
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
-                          'Transactions',
-                        ),
-                        Text(
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                          'See all',
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        TransactionHistory(
-                          time: 'october, 12 8:30 PM',
-                          address: 'uweawvuuxvuyxrau',
-                          amount: -24.24,
-                        ),
-                      ],
-                    ),
-                  ],
+                child: Text(
+                  style: TextStyle(color: Colors.white, fontSize: 15),
+                  'Add Money',
                 ),
               ),
             ],
           ),
         ),
-      ),
+        SizedBox(
+          height: 250,
+          width: double.infinity,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                    'Your cards',
+                  ),
+                  Row(
+                    children: [
+                      Icon(Icons.add),
+                      Text(
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 17,
+                        ),
+                        'New card',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.3,
+                child: ListView.builder(
+                  itemCount: transactions.length,
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (context, index) {
+                    return Card();
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        Container(
+          height: 403,
+          width: double.infinity,
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                    'Transactions',
+                  ),
+                  Text(
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    'See all',
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.4,
+                child: ListView.builder(
+                  itemCount: transactions.length,
+                  reverse: true,
+                  itemBuilder: (context, index) {
+                    var item = transactions[index];
+                    return TransactionHistory(
+                      time: item.date,
+                      address: item.name,
+                      amount: item.amount,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
 
-class TransactionHistory extends StatelessWidget {
-  final String time;
-  final String address;
-  final double amount;
-
-  const TransactionHistory({
-    super.key,
-    required this.time,
-    required this.address,
-    required this.amount,
-  });
+class Card extends StatelessWidget {
+  const Card({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 20),
-      height: 70,
-      width: 330,
-      // color: Colors.amberAccent,
-      child: Row(
+      height: 170,
+      width: 300,
+      margin: EdgeInsets.only(right: 20),
+      padding: EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: Colors.green[300],
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Image.asset('images/mc.png', height: 100, width: 35),
-          Container(
-            width: 290,
-            padding: EdgeInsets.only(left: 20),
-            // color: Colors.black12,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+                'N.',
+              ),
+              Image(width: 50, height: 50, image: AssetImage('images/mc.png')),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                children: [
+                  Text('Debit card'),
+                  Row(
+                    children: [
+                      Icon(Icons.horizontal_rule),
+                      Text(
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                        '4098',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Container(
+                width: 100,
+                height: 50,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  color: Colors.white,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Text(
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 17,
-                      ),
-                      address,
-                    ),
-                    Text(
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 17,
-                      ),
-                      '\$$amount',
-                    ),
+                    Icon(Icons.remove_red_eye_outlined),
+                    Text('Details'),
                   ],
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(time),
-                    Container(
-                      width: 50,
-                      height: 25,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.lightGreenAccent,
-                      ),
-                      child: Center(child: Text('Done')),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
