@@ -1,5 +1,7 @@
+// import 'package:bank/http/login.dart';
 import 'package:flutter/material.dart';
 import 'package:bank/partials/transaction_history.dart';
+import "package:bank/partials/card.dart";
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -39,6 +41,7 @@ class _DashboardState extends State<Dashboard>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.blueGrey[100],
       appBar: AppBar(
         backgroundColor: Colors.blueGrey[100],
@@ -112,7 +115,7 @@ class _DashboardState extends State<Dashboard>
           controller: _tabController,
           children: [
             SingleChildScrollView(child: _dashboard(context)),
-            Container(
+            SizedBox(
               width: 300,
               height: 400,
               child: ListTile(
@@ -121,7 +124,7 @@ class _DashboardState extends State<Dashboard>
                 subtitle: Text("data subtilte"),
               ),
             ),
-            Container(color: Colors.blue, width: 300, height: 400,),
+            Container(color: Colors.blue, width: 300, height: 400),
             Container(color: Colors.black, width: 300, height: 400),
             Container(color: Colors.pink, width: 300, height: 400),
           ],
@@ -158,7 +161,7 @@ class _DashboardState extends State<Dashboard>
                 ],
               ),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   showModalBottomSheet(
                     context: context,
                     builder: (context) => Container(
@@ -260,10 +263,10 @@ class _DashboardState extends State<Dashboard>
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.3,
                 child: ListView.builder(
-                  itemCount: transactions.length,
+                  itemCount: 3,
                   scrollDirection: Axis.horizontal,
                   itemBuilder: (context, index) {
-                    return Card();
+                    return Cards();
                   },
                 ),
               ),
@@ -272,7 +275,7 @@ class _DashboardState extends State<Dashboard>
         ),
 
         Container(
-          height: 403,
+          height: MediaQuery.of(context).size.height * 0.6,
           width: double.infinity,
           padding: EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -298,9 +301,11 @@ class _DashboardState extends State<Dashboard>
                 height: MediaQuery.of(context).size.height * 0.4,
                 child: ListView.builder(
                   itemCount: transactions.length,
-                  reverse: true,
+                  
+
                   itemBuilder: (context, index) {
-                    var item = transactions[index];
+                  
+                    var item = transactions.reversed.toList()[index];
                     return TransactionHistory(
                       time: item.date,
                       address: item.name,
@@ -317,72 +322,72 @@ class _DashboardState extends State<Dashboard>
   }
 }
 
-class Card extends StatelessWidget {
-  const Card({super.key});
+// class Card extends StatelessWidget {
+//   const Card({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 170,
-      width: 300,
-      margin: EdgeInsets.only(right: 20),
-      padding: EdgeInsets.all(13),
-      decoration: BoxDecoration(
-        color: Colors.green[300],
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
-                'N.',
-              ),
-              Image(width: 50, height: 50, image: AssetImage('images/mc.png')),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                children: [
-                  Text('Debit card'),
-                  Row(
-                    children: [
-                      Icon(Icons.horizontal_rule),
-                      Text(
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                        '4098',
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              Container(
-                width: 100,
-                height: 50,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  color: Colors.white,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Icon(Icons.remove_red_eye_outlined),
-                    Text('Details'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       height: 170,
+//       width: 300,
+//       margin: EdgeInsets.only(right: 20),
+//       padding: EdgeInsets.all(13),
+//       decoration: BoxDecoration(
+//         color: Colors.green[300],
+//         borderRadius: BorderRadius.circular(30),
+//       ),
+//       child: Column(
+//         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//         children: [
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//             children: [
+//               Text(
+//                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+//                 'N.',
+//               ),
+//               Image(width: 50, height: 50, image: AssetImage('images/mc.png')),
+//             ],
+//           ),
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//             children: [
+//               Column(
+//                 children: [
+//                   Text('Debit card'),
+//                   Row(
+//                     children: [
+//                       Icon(Icons.horizontal_rule),
+//                       Text(
+//                         style: TextStyle(
+//                           fontWeight: FontWeight.bold,
+//                           fontSize: 20,
+//                         ),
+//                         '4098',
+//                       ),
+//                     ],
+//                   ),
+//                 ],
+//               ),
+//               Container(
+//                 width: 100,
+//                 height: 50,
+//                 decoration: BoxDecoration(
+//                   borderRadius: BorderRadius.circular(15),
+//                   color: Colors.white,
+//                 ),
+//                 child: Row(
+//                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//                   children: [
+//                     Icon(Icons.remove_red_eye_outlined),
+//                     Text('Details'),
+//                   ],
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
